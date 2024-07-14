@@ -45,7 +45,7 @@
                     fill="currentColor"></rect>
             </svg>
             <a class="ml-4 rtl:ml-0 rtl:mr-4 text-2xl font-semibold opacity-100 dark:text-white" href="#">
-              APAYM
+              CRM
             </a>
           </div>
 

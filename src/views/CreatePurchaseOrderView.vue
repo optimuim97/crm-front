@@ -3,6 +3,8 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import useProducts from "@/services/products";
 import useProviders from "@/services/providers";
+import usePurchaseOrders from "@/services/purchaseOrders";
+import { toast } from "vue3-toastify";
 
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
@@ -15,31 +17,70 @@ import Column from "primevue/column";
 const postData = ref({});
 const totalAmount = ref(0);
 
+//handle Action Button
+const isDropdownOpen = ref([]);
+const showMoreActions = (index) => {
+  isDropdownOpen.value[index] = !isDropdownOpen.value[index];
+};
+
 const handleChange = (event) => {
   totalAmount.value = calculateTotalAmount(event.value);
   console.log("Selected products:", event.value);
 };
+
 const { products, isLoading, loading, getProducts } = useProducts();
 const { providers, getProviders } = useProviders();
+const {
+  purchaseOrders,
+  postPurchaseOrders,
+  getPurchaseOrders,
+  validatePurchaseOrders,
+} = usePurchaseOrders();
+
+const addPurchaseOrder = async () => {
+  await postPurchaseOrders(postData.value);
+  // Reload Purchase Order
+  await getPurchaseOrders();
+
+  toast.success("Bon de commande créer");
+  postData.value = {};
+};
+
+const validerCommande = async (orderNumber) => {
+  await validatePurchaseOrders(orderNumber);
+  // Reload Purchase Order
+  await getPurchaseOrders();
+
+  toast.success("Commande Validé");
+  postData.value = {};
+};
 
 const updateProductList = async () => {
   await getProducts();
 };
 
 function calculateTotalAmount(items) {
-  return items.reduce((total, item) => {
-    const quantity = item.quantity || 0;
-    const price = item.price || 0;
-    return total + quantity * price;
-  }, 0);
+  return (
+    items?.reduce((total, item) => {
+      const quantity = item.quantity || 0;
+      const price = item.price || 0;
+      return total + quantity * price;
+    }, 0) ?? 0
+  );
 }
 
 // Watch for changes in postData.products and recalculate totalAmount
-watch(() => postData.value.products, (newProducts) => {
-  totalAmount.value = calculateTotalAmount(newProducts);
-}, { deep: true });
+watch(
+  () => postData.value.products,
+  (newProducts) => {
+    totalAmount.value = calculateTotalAmount(newProducts);
+    postData.value.total_amount = totalAmount.value;
+  },
+  { deep: true }
+);
 
 onMounted(async () => {
+  await getPurchaseOrders();
   await getProducts();
   await getProviders();
 });
@@ -135,6 +176,7 @@ onMounted(async () => {
 
               )
               <input
+                required
                 type="number"
                 v-model="product.quantity"
                 min="1"
@@ -145,6 +187,182 @@ onMounted(async () => {
           <div class="text-xl font-bold">
             Montant Total: {{ $filters.formatAmount(totalAmount) }}
           </div>
+        </div>
+      </div>
+
+      <!-- <p>
+        {{ postData }}
+      </p> -->
+
+      <div class="flex justify-end my-2">
+        <Button
+          class="btn btn-primary mr-3"
+          label="Soumettre"
+          icon="pi pi-check"
+          :loading="loading"
+          @click="addPurchaseOrder"
+        />
+      </div>
+    </div>
+
+    <div class="container mx-auto p-4">
+      <div class="overflow-x-auto">
+        <div class="mt-6 overflow-x-auto">
+          <!-- {{ purchaseOrders }} -->
+
+          <DataTable
+            :loading="loading"
+            dataKey="id"
+            ref="dt"
+            filterDisplay="menu"
+            :value="purchaseOrders"
+            paginator
+            :rows="5"
+            tableStyle="min-width: 50rem"
+          >
+            <template #header>
+              <div class="flex justify-between">
+                <div class="flex justify-start gap-2">
+                  <!-- <Button
+                    icon="pi pi-plus"
+                    label="Ajouter"
+                    outlined
+                    @click="showModal_()"
+                    class="btn btn-primary"
+                  /> -->
+                </div>
+              </div>
+            </template>
+            <template #empty> Aucune Commande </template>
+            <template #loading> Chargement... </template>
+
+            <Column header="Fournisseur">
+              <template #body="slotProps">
+                <td class="py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <h6 class="text-base capitalize truncate hover:text-clip">
+                      {{ slotProps.data.provider_id }}
+                    </h6>
+                  </div>
+                </td>
+              </template>
+            </Column>
+
+            <Column header=" # Numéro Commande ">
+              <template #body="slotProps">
+                <td class="py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <h6 class="text-base capitalize truncate hover:text-clip">
+                      {{ slotProps.data.order_number ?? "-" }}
+                    </h6>
+                  </div>
+                </td>
+              </template>
+            </Column>
+
+            <Column header="Montant Total ">
+              <template #body="slotProps">
+                <td class="py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <h6 class="text-base capitalize truncate hover:text-clip">
+                      {{
+                        $filters.formatAmount(slotProps.data.total_amount) ?? 0
+                      }}
+                    </h6>
+                  </div>
+                </td>
+              </template>
+            </Column>
+
+            <Column header="Statut">
+              <template #body="slotProps">
+                <td class="py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <h6 class="text-base capitalize truncate hover:text-clip">
+                      {{ slotProps.data.is_valided ? "Validé" : "En attente" }}
+                    </h6>
+                  </div>
+                </td>
+              </template>
+            </Column>
+
+            <Column header="Date de Création">
+              <template #body="slotProps">
+                <td class="py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <h6 class="text-base capitalize truncate hover:text-clip">
+                      {{ $filters.formatDate(slotProps.data.created_at) }}
+                    </h6>
+                  </div>
+                </td>
+              </template>
+            </Column>
+
+            <Column header="Action">
+              <template #body="slotProps">
+                <!-- Plus d'actions -->
+                <div>
+                  <a
+                    class="btn bg-[#eee] btn-sm btn-icon rounded-full"
+                    title="Plus d'actions"
+                    @click="showMoreActions(slotProps.index)"
+                  >
+                    <span
+                      class="btn-inner pi pi-ellipsis-v"
+                      data-pc-section="icon"
+                    ></span>
+                  </a>
+                  <div
+                    class="absolute z-50 right-4 py-2 text-left text-secondary-600 bg-white border rounded shadow-md mt-3 dropdown"
+                    v-if="isDropdownOpen[slotProps.index]"
+                  >
+                    <a
+                      class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
+                      title="Plus d'actions"
+                      href="javascript:void(0);"
+                      v-if="slotProps.data.is_valided != true"
+                      @click="validerCommande(slotProps.data.order_number)"
+                    >
+                      Valider
+                    </a>
+
+                    <a
+                      v-if="slotProps.data.is_valided"
+                      class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
+                      title="Plus d'actions"
+                      href="javascript:void(0);"
+                      @click="
+                        () => {
+                          slotProps.data.id;
+                          showUpdateModal = true;
+                          customers = slotProps.data;
+                        }
+                      "
+                    >
+                      Facture
+                    </a>
+
+                    <!-- <a
+                      class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
+                      title="Plus d'actions"
+                      href="javascript:void(0);"
+                      @click="deleteProduct(slotProps.data.id)"
+                      aria-disabled="true"
+                    >
+                      Supprimer
+                    </a> -->
+                  </div>
+                </div>
+                <!-- Plus d'actions -->
+              </template>
+            </Column>
+
+            <template #footer>
+              Il y a
+              {{ customers ? customers.length : 0 }}
+              Customer(s) au total.
+            </template>
+          </DataTable>
         </div>
       </div>
     </div>

@@ -35,11 +35,11 @@ const props = defineProps({
 const addProduct = async () => {
   await postProviders(postData);
 
-  // Reload Bank
+  // Reload
   await getProviders();
 
   emit("refreshProviders");
-  toast.success("Produit Ajouté");
+  toast.success("Fournisseur Ajouté");
   props.closeModal();
 };
 

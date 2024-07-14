@@ -36,8 +36,7 @@ const props = defineProps({
 
 const addProduct = async () => {
   await postProducts(postData);
-
-  // Reload Bank
+  // Reload
   await getProducts();
 
   emit('refreshProducts')

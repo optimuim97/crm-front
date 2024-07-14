@@ -24,7 +24,7 @@ export const toggleProfileIcon = ref(false);
 
 
 
-export const appName = ref('BACKOFFICE');
+export const appName = ref('CRM');
 
 // Functions
 /**

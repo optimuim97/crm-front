@@ -22,7 +22,7 @@ const router = createRouter({
     },   
     {
       path: "/customers",
-      name: "Fournisseurs",
+      name: "Utilisateurs",
       component: () => import("@/views/Customers/CustomerView.vue"),
     },   
     {
