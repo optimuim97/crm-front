@@ -1,0 +1,8 @@
+<template>
+  <div class="loader simple-loader">
+    <div class="loader-body"></div>
+  </div>
+</template>
+<script setup></script>
+
+<style scoped></style>

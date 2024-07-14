@@ -1,0 +1,111 @@
+[
+    {
+        "nom": "Accueil",
+        "auth": true,
+        "libelle": "Tableau de bord",
+        "sous_menu": []
+    },
+    {
+        "nom": "Utilisateurs",
+        "auth": true,
+        "libelle": "Utilisateurs",
+        "sous_menu": [
+            {
+                "nom": "Creation_Utilisateurs_Apaym",
+                "auth": true,
+                "libelle": "Créé un utilisateur",
+                "sous_menu": []
+            },
+            {
+                "nom": "Liste_Utilisateurs_Apaym",
+                "auth": true,
+                "libelle": "Liste des utilisateurs",
+                "sous_menu": []
+            }
+        ]
+    },
+    {
+        "nom": "Cartes",
+        "auth": true,
+        "libelle": "Cartes",
+        "sous_menu": []
+    },
+    {
+        "nom": "Recharger",
+        "auth": true,
+        "libelle": "Recharger",
+        "sous_menu": []
+    },
+    {
+        "nom": "Transferer",
+        "auth": true,
+        "libelle": "Transférer",
+        "sous_menu": [
+            {
+                "nom": "Liste_Transferts",
+                "auth": true,
+                "libelle": "Liste Transfert"
+            },
+            {
+                "nom": "Soldes",
+                "auth": true,
+                "libelle": "Soldes"
+            }
+        ]
+    },
+    {
+        "nom": "Marchands",
+        "auth": true,
+        "libelle": "Marchands",
+        "sous_menu": []
+    },
+    {
+        "nom": "Services",
+        "auth": true,
+        "libelle": "Services",
+        "sous_menu": []
+    },
+    {
+        "nom": "Annonces",
+        "auth": true,
+        "libelle": "Annonces",
+        "sous_menu": []
+    },
+    {
+        "nom": "Caisse",
+        "auth": true,
+        "libelle": "Caisse",
+        "sous_menu": []
+    },
+    {
+        "nom": "Parametres",
+        "auth": true,
+        "libelle": "Paramètres",
+        "sous_menu": [
+            {
+                "nom": "Partenaires",
+                "auth": true,
+                "libelle": "Partenaires",
+                "sous_menu": []
+            },
+            {
+                "nom": "Administrateurs",
+                "auth": true,
+                "libelle": "Administrateurs",
+                "sous_menu": []
+            },
+            {
+                "nom": "Logs_Administrateurs",
+                "auth": true,
+                "libelle": "Logs administrateurs",
+                "sous_menu": []
+            },
+            {
+                "nom": "Logs_Authentification",
+                "auth": true,
+                "libelle": "Logs authentification",
+                "sous_menu": []
+            }
+        ]
+    }
+]
