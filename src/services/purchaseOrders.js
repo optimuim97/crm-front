@@ -3,6 +3,7 @@ import axios from "axios";
 
 export default function () {
   const purchaseOrders = ref([]);
+  const invoices = ref([]);
 
   const loading = ref(false);
   const isLoading = ref(false);
@@ -57,7 +58,6 @@ export default function () {
           if (data?.status == 200 || status == 201) {
             purchaseOrders.value.push(data.data);
             console.log({ result: data.data });
-            // purchaseOrders.value = data.data;
           }
         } else if (code == 500) {
           console.log({ code: code });
@@ -107,17 +107,18 @@ export default function () {
       });
   };
 
-  const validatePurchaseOrders = async (postedData) => {
+  const validatePurchaseOrders = async (orderNumber) => {
     loading.value = true;
-    console.log({ postedData: postedData });
 
     await axios
-      .patch(`/update-purchase-order/${postedData.order_number}`)
+      .patch(`/update-purchase-order/${orderNumber}`)
       .then(({ data, status, code }) => {
         if (status == 200) {
           if (data?.status == 200) {
-            purchaseOrders.value.push(data.data);
-            console.log({ result: data.data });
+            purchaseOrders.value.push(data.data.order);
+            invoices.value.push(data.data.invoice);
+
+            return purchaseOrders;
           }
         } else if (code == 500) {
           console.log({ code: code });
@@ -139,6 +140,7 @@ export default function () {
 
   return {
     purchaseOrders,
+    invoices,
     loading,
     isLoading,
     getPurchaseOrders,

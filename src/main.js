@@ -140,9 +140,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 app.use(DialogService);
 app.use(axiosPlugin, {});
-app.use(router);
 
-// app.use(VueClipboard);
 
 app.directive("tooltip", Tooltip);
 app.directive("badge", BadgeDirective);
@@ -151,7 +149,6 @@ app.directive("ripple", Ripple);
 app.directive("styleclass", StyleClass);
 app.directive("focustrap", FocusTrap);
 app.directive("animateonscroll", AnimateOnScroll);
-// app.directive("maska", vMaska);
 
 app.component("Stepper", Stepper);
 app.component("StepperPanel", StepperPanel);

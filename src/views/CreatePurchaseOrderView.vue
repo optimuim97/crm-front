@@ -1,11 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 
+import useTransaction from "@/services/transactions";
 import useProducts from "@/services/products";
 import useProviders from "@/services/providers";
 import usePurchaseOrders from "@/services/purchaseOrders";
 import { toast } from "vue3-toastify";
-
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
 import TheSidebar from "@/components/partials/TheSidebar.vue";
@@ -13,6 +13,8 @@ import TheBanner from "@/components/partials/TheBanner.vue";
 import TheHeaderNav from "@/components/partials/TheHeaderNav.vue";
 import TheLottieLoader from "@/components/partials/TheLottieLoader.vue";
 import Column from "primevue/column";
+
+import PaymentModal from "@/components/modals/PaymentModal.vue";
 
 const postData = ref({});
 const totalAmount = ref(0);
@@ -23,6 +25,15 @@ const showMoreActions = (index) => {
   isDropdownOpen.value[index] = !isDropdownOpen.value[index];
 };
 
+const showModal = ref();
+const showModal_ = () => {
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
 const handleChange = (event) => {
   totalAmount.value = calculateTotalAmount(event.value);
   console.log("Selected products:", event.value);
@@ -30,7 +41,9 @@ const handleChange = (event) => {
 
 const { products, isLoading, loading, getProducts } = useProducts();
 const { providers, getProviders } = useProviders();
+const { postPayments, paymentsMethods, getPayments } = useTransaction();
 const {
+  invoices,
   purchaseOrders,
   postPurchaseOrders,
   getPurchaseOrders,
@@ -47,6 +60,7 @@ const addPurchaseOrder = async () => {
 };
 
 const validerCommande = async (orderNumber) => {
+  alert(orderNumber);
   await validatePurchaseOrders(orderNumber);
   // Reload Purchase Order
   await getPurchaseOrders();
@@ -83,6 +97,7 @@ onMounted(async () => {
   await getPurchaseOrders();
   await getProducts();
   await getProviders();
+  await getPayments();
 });
 </script>
 
@@ -331,26 +346,10 @@ onMounted(async () => {
                       class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
                       title="Plus d'actions"
                       href="javascript:void(0);"
-                      @click="
-                        () => {
-                          slotProps.data.id;
-                          showUpdateModal = true;
-                          customers = slotProps.data;
-                        }
-                      "
+                      @click="openModalRecuTransaction(slotProps.data)"
                     >
                       Facture
                     </a>
-
-                    <!-- <a
-                      class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
-                      title="Plus d'actions"
-                      href="javascript:void(0);"
-                      @click="deleteProduct(slotProps.data.id)"
-                      aria-disabled="true"
-                    >
-                      Supprimer
-                    </a> -->
                   </div>
                 </div>
                 <!-- Plus d'actions -->
@@ -359,12 +358,21 @@ onMounted(async () => {
 
             <template #footer>
               Il y a
-              {{ customers ? customers.length : 0 }}
-              Customer(s) au total.
+              {{ purchaseOrders ? purchaseOrders.length : 0 }}
+              Bon de Commande(s) au total.
             </template>
           </DataTable>
         </div>
       </div>
     </div>
   </main>
+
+  <PaymentModal
+    :visible="showModal"
+    :totalAmount="totalAmount"
+    :invoice="invoices"
+    :showModal="showModal"
+    :closeModal="closeModal"
+  >
+  </PaymentModal>
 </template>
