@@ -1,4 +1,4 @@
-# front-batimat
+# crm-front
 
 ## Project setup
 ```
