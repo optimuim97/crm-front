@@ -300,39 +300,6 @@
                 </div>
               </li>
 
-
-              <li x-data="{ open: false }">
-                <a class="flex items-center px-2" href="#" @click="open = !open">
-                  <img src="{{path}}assets/images/avatars/01.png" alt="User-Profile" class="max-w-full rounded-full "
-                       height="50px" width="50px">
-                  <div class="hidden ml-4 rtl:ml-0 rtl:mr-4 md:block">
-                    <h6 class="font-medium dark:text-secondary-600">Austin Robertson</h6>
-                    <p
-                        class="text-lg text-secondary-500 hover:text-secondary-700 dark:text-white dark:hover:text-secondary-500 transition-all duration-500 ease-in-out">
-                      Marketing Administrator</p>
-                  </div>
-                </a>
-                <ul x-show="open" class="absolute z-40 w-40 p-0 py-2 right-0 rounded bg-white dark:bg-dark-card"
-                    @click.outside="open = false" x-transition:enter="transition ease-in duration-500"
-                    x-transition:enter-start="opacity-0 transform translate-y-16"
-                    x-transition:enter-end="opacity-100 transform translate-y-0"
-                    x-transition:leave="transition ease-out duration-500"
-                    x-transition:leave-start="opacity-100 transform translate-y-0"
-                    x-transition:leave-end="opacity-0 transform translate-y-0">
-                  <li><a
-                      class="block w-full px-4 py-1 text-lg text-secondary-600 dark:text-secondary-600 focus:bg-primary-500 focus:text-white hover:text-primary-500 dark:hover:text-primary-500 rounded-t"
-                      href="{{path}}dashboard/app/user-profile.html">Profile</a></li>
-                  <li><a
-                      class="block w-full px-4 py-1 text-lg text-secondary-600 dark:text-secondary-600 focus:bg-primary-500 focus:text-white hover:text-primary-500 dark:hover:text-primary-500"
-                      href="{{path}}dashboard/app/user-privacy-setting.html">Privacy Setting</a></li>
-                  <li>
-                    <hr class="dark:border-secondary-700 m-0 dark:m-0">
-                  </li>
-                  <li><a
-                      class="block w-full px-4 py-1 text-lg text-secondary-600 dark:text-secondary-600 focus:bg-primary-500 focus:text-white hover:text-primary-500 dark:hover:text-primary-500 rounded-b"
-                      >Déconnexion</a></li>
-                </ul>
-              </li>
             </ul>
           </div>
         </div>

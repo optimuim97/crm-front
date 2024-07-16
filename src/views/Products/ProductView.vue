@@ -121,7 +121,7 @@ const closeUpdateModal = () => {
                             <h6
                               class="text-base capitalize truncate hover:text-clip"
                             >
-                              {{ slotProps.data.price ?? 0 }}
+                              {{ $filters.formatAmount(slotProps.data.price) ?? 0 }}
                             </h6>
                           </div>
                         </td>
@@ -136,6 +136,20 @@ const closeUpdateModal = () => {
                               class="text-base capitalize truncate hover:text-clip"
                             >
                               {{ slotProps.data.internal_reference ?? 0 }}
+                            </h6>
+                          </div>
+                        </td>
+                      </template>
+                    </Column>
+                    
+                    <Column header="Quantité en Stock ">
+                      <template #body="slotProps">
+                        <td class="py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <h6
+                              class="text-base capitalize truncate hover:text-clip"
+                            >
+                              {{ slotProps.data.quantity_stock ?? 0 }}
                             </h6>
                           </div>
                         </td>
@@ -172,53 +186,6 @@ const closeUpdateModal = () => {
                             </h6>
                           </div>
                         </td>
-                      </template>
-                    </Column>
-
-                    <Column header="Action">
-                      <template #body="slotProps">
-                        <!-- Plus d'actions -->
-                        <div>
-                          <a
-                            class="btn bg-[#eee] btn-sm btn-icon rounded-full"
-                            title="Plus d'actions"
-                            @click="showMoreActions(slotProps.index)"
-                          >
-                            <span
-                              class="btn-inner pi pi-ellipsis-v"
-                              data-pc-section="icon"
-                            ></span>
-                          </a>
-                          <div
-                            class="absolute z-50 right-4 py-2 text-left text-secondary-600 bg-white border rounded shadow-md mt-3 dropdown"
-                            v-if="isDropdownOpen[slotProps.index]"
-                          >
-                            <a
-                              class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
-                              title="Plus d'actions"
-                              href="javascript:void(0);"
-                              @click="
-                                () => {
-                                  slotProps.data.id;
-                                  showUpdateModal = true;
-                                  products = slotProps.data;
-                                }
-                              "
-                            >
-                              Modifier
-                            </a>
-                            <a
-                              class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
-                              title="Plus d'actions"
-                              href="javascript:void(0);"
-                              @click="deleteProduct(slotProps.data.id)"
-                              aria-disabled="true"
-                            >
-                              Supprimer
-                            </a>
-                          </div>
-                        </div>
-                        <!-- Plus d'actions -->
                       </template>
                     </Column>
 

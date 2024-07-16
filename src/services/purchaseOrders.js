@@ -4,6 +4,7 @@ import axios from "axios";
 export default function () {
   const purchaseOrders = ref([]);
   const invoices = ref([]);
+  const error = ref();
 
   const loading = ref(false);
   const isLoading = ref(false);
@@ -21,12 +22,16 @@ export default function () {
 
         if (status == 200) {
           if (data?.status == 200) {
+            purchaseOrders.value = data.data;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log(code);
         } else if (code == 401) {
+          error.value = code;
           console.log(code);
         } else if (code == 404) {
+          error.value = code;
           console.log(code);
         }
         isLoading.value = false;
@@ -34,6 +39,7 @@ export default function () {
       })
       .catch((e) => {
         console.log({ e: e });
+        error.value = e;
       })
       .finally(() => {
         isLoading.value = false;
@@ -44,8 +50,8 @@ export default function () {
   const postPurchaseOrders = async (postedData) => {
     // console.log({ postedData: postedData });
     loading.value = true;
-    postedData.provider_reference = postedData.provider.reference;
-    postedData.provider_id = postedData.provider.id;
+    postedData.provider_reference = postedData.provider?.reference;
+    postedData.provider_id = postedData.provider?.id;
 
     await axios
       .post("/create-purchase-order", postedData, {
@@ -60,16 +66,20 @@ export default function () {
             console.log({ result: data.data });
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -90,16 +100,20 @@ export default function () {
             console.log({ result: data.data });
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -121,6 +135,7 @@ export default function () {
             return purchaseOrders;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
           console.log({ code: code });
@@ -139,6 +154,7 @@ export default function () {
   };
 
   return {
+  error,
     purchaseOrders,
     invoices,
     loading,

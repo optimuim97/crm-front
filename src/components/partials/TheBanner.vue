@@ -9,7 +9,9 @@
         <!-- Mobile menu button-->
         <div
           class="absolute flex items-center px-2 py-1 text-xl border border-secondary-500 rounded lg:hidden"
-          :class="setting.theme_scheme_direction == 'ltr' ? 'right-0' : 'left-0'"
+          :class="
+            setting.theme_scheme_direction == 'ltr' ? 'right-0' : 'left-0'
+          "
         >
           <button
             type="button"
@@ -73,13 +75,15 @@
           <div
             class="hidden lg:flex lg:flex-grow transition-all duration-700 ease-in-out"
           >
-            <ul class="flex items-center mb-2 ml-auto rtl:ml-0 rtl:mr-auto lg:mb-0">
+            <ul
+              class="flex items-center mb-2 ml-auto rtl:ml-0 rtl:mr-auto lg:mb-0"
+            >
               <li
                 class="ltr:border-r rtl:border-l ltr:pr-4 rtl:pl-4 dark:border-secondary-700"
               >
                 <div class="">
                   <p class="text-sm font-semibold uppercase m-2">
-                    {{ adminConnecte.nom }} {{ adminConnecte.prenoms }}
+                    {{ adminConnecte.name }}
                   </p>
                 </div>
               </li>
@@ -181,7 +185,9 @@ const logout = () => {
 const getInfosCurrentAdmin = async () => {
   try {
     const datas = await axios.get("/user");
-    adminConnecte.value = datas.data.data;
+    adminConnecte.value = datas.data;
+
+    console.log({ adminConnecte: adminConnecte.value });
   } catch (err) {
     console.log(err);
   }

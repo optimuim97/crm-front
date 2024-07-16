@@ -14,22 +14,32 @@ const router = createRouter({
       path: "/products",
       name: "Produits",
       component: () => import("@/views/Products/ProductView.vue"),
-    },   
+    },
     {
       path: "/providers",
       name: "Fournisseurs",
       component: () => import("@/views/Providers/ProviderView.vue"),
-    },   
+    },
     {
       path: "/customers",
-      name: "Utilisateurs",
+      name: "Clients",
       component: () => import("@/views/Customers/CustomerView.vue"),
-    },   
+    },
+    // {
+    //   path: "/invoice",
+    //   name: "Facture",
+    //   component: () => import("@/components/InvoiceComponent.vue"),
+    // },
     {
       path: "/create-purchase-order",
-      name: "CreatePurchaseOrder",
+      name: "Achats",
       component: () => import("@/views/CreatePurchaseOrderView.vue"),
-    },   
+    },
+    {
+      path: "/create-sales",
+      name: "Ventes",
+      component: () => import("@/views/CreateSalesView.vue"),
+    },
   ],
 });
 

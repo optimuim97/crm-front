@@ -3,13 +3,14 @@ import axios from "axios";
 
 export default function () {
   const providers = ref([]);
+  const error = ref();
 
   const loading = ref(false);
   const isLoading = ref(false);
 
   const getProviders = async () => {
     isLoading.value = true;
-    // loading.value = true;
+    loading.value = true;
 
     await axios
       .get("/providers")
@@ -20,23 +21,28 @@ export default function () {
 
         if (status == 200) {
           if (data?.status == 200) {
+            providers.value = data.data;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log(code);
         } else if (code == 401) {
+          error.value = code;
           console.log(code);
         } else if (code == 404) {
+          error.value = code;
           console.log(code);
         }
         isLoading.value = false;
-        // loading.value = false;
+        loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ e: e });
       })
       .finally(() => {
         isLoading.value = false;
-        // loading.value = false;
+        loading.value = false;
       });
   };
 
@@ -54,22 +60,24 @@ export default function () {
         if (status == 200) {
           if (data?.status == 200) {
             providers.value.push(data.data);
-
             console.log({ result: data.data });
-
             // providers.value = data.data;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -90,16 +98,20 @@ export default function () {
             console.log({ result: data.data });
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -108,6 +120,7 @@ export default function () {
   };
 
   return {
+    error,
     providers,
     loading,
     isLoading,

@@ -2,24 +2,25 @@ import { ref } from "vue";
 import axios from "axios";
 
 export default function () {
-  const customers = ref([]);
-  const error = ref();
+  const quotations = ref([]);
+  const error = ref([]);
 
   const loading = ref(false);
   const isLoading = ref(false);
 
-  const getCustomers = async () => {
+  const getQuotations = async () => {
     isLoading.value = true;
     // loading.value = true;
 
     await axios
-      .get("/customers")
+      .get("/quotations")
       .then(({ data, status, code }) => {
-        customers.value = data.data;
+        console.log(data);
+        quotations.value = data.data;
 
         if (status == 200) {
           if (data?.status == 200) {
-            customers.value = data.data;
+            quotations.value = data.data;
           }
         } else if (code == 500) {
           error.value = code;
@@ -35,9 +36,8 @@ export default function () {
         // loading.value = false;
       })
       .catch((e) => {
-        console.log({ e: e });
         error.value = e;
-
+        console.log({ e: e });
       })
       .finally(() => {
         isLoading.value = false;
@@ -45,36 +45,37 @@ export default function () {
       });
   };
 
-  const postCustomers = async (postedData) => {
+  const postQuotation = async (postedData) => {
     loading.value = true;
-    console.log({ postedData: postedData });
+    postedData.customer_id = postedData.customer.id;
 
     await axios
-      .post("/add-customer", postedData, {
+      .post("/create-quotation", postedData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       .then(({ data, status, code }) => {
-        if (status == 200) {
-          if (data?.status == 200) {
-            customers.value.push(data.data);
-
+        if (status == 200 || status == 201) {
+          if (data?.status == 200 || status == 201) {
+            quotations.value.push(data.data);
             console.log({ result: data.data });
-
-            // customers.value = data.data;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -82,30 +83,73 @@ export default function () {
       });
   };
 
-  const updateCustomers = async (postedData) => {
+  const updateQuotation = async (postedData) => {
     loading.value = true;
     console.log({ postedData: postedData });
 
     await axios
-      .post(`/update-customer/${postedData.id}`, postedData)
+      .post(`/update-purchaseOrder/${postedData.id}`, postedData)
       .then(({ data, status, code }) => {
         if (status == 200) {
           if (data?.status == 200) {
-            customers.value.push(data.data);
+            error.value = code;
+            quotations.value.push(data.data);
             console.log({ result: data.data });
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  };
+
+  const validateQuotation = async (orderNumber) => {
+    loading.value = true;
+
+    await axios
+      .post(`/confirm-quotation/${orderNumber}`)
+      .then(({ data, status, code }) => {
+        if (status == 200) {
+          if (data?.status == 200) {
+            quotations.value.push(data.data.order);
+          }
+        } else if (code == 500) {
+          console.log({ code: code });
+
+          error.value = code;
+          console.log(error);
+        } else if (code == 401) {
+          console.log({ code: code });
+          error.value = code;
+          console.log(error);
+        } else if (code == 404) {
+          console.log({ code: code });
+          error.value = code;
+          console.log(error);
+        }
+        isLoading.value = false;
+        loading.value = false;
+      })
+      .catch((e) => {
+        console.log({ error: e });
+
+        error.value = e;
+        console.log(e);
       })
       .finally(() => {
         loading.value = false;
@@ -113,11 +157,13 @@ export default function () {
   };
 
   return {
-    customers,
+    error,
+    quotations,
     loading,
     isLoading,
-    getCustomers,
-    postCustomers,
-    updateCustomers,
+    getQuotations,
+    postQuotation,
+    updateQuotation,
+    validateQuotation,
   };
 }

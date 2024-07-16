@@ -7,8 +7,8 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import Button from "primevue/button";
 import { jwtDecode } from "jwt-decode";
-// const showAlert = ref(false);
-const authentification = ref({
+
+const postData = ref({
   email: "",
   password: "",
 });
@@ -23,15 +23,15 @@ if (storeAdmin.token) {
 }
 
 if (exp < Date.now() / 1000) {
-  // router.push({ name: "Connexion" });
+  router.push({ name: "Connexion" });
 } else {
-  // router.push({ name: "Accueil" });
+  router.push({ name: "Achats" });
 }
 
 const login = async () => {
   if (
-    authentification.value.email.replace(/\s/g, "") === "" ||
-    authentification.value.password === ""
+    postData.value.email.replace(/\s/g, "") === "" ||
+    postData.value.password === ""
   ) {
     toast.info("Veuillez renseigner votre e-mail et votre mot de passe !", {
       autoClose: true,
@@ -39,10 +39,10 @@ const login = async () => {
     return false;
   }
 
-  // console.log(authentification.value);
+  // console.log(postData.value);
   loading.value = true; ////Couper le loader du bouton de connexion
   try {
-    const datas = await axios.post("authentification", authentification.value);
+    const datas = await axios.post("sign-in", postData.value);
 
     if (datas.data.code === 403) {
       toast.error(datas.data.message, {
@@ -58,9 +58,11 @@ const login = async () => {
 
     storeAdmin.setUser(datas.data.administrateur);
     storeAdmin.setToken(datas.data.token);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${datas.data.token}`;
+    axios.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${datas.data.token}`;
 
-    router.push({ name: "Connexion" });
+    router.push({ name: "Produits" });
   } catch (err) {
     loading.value = false; ////Couper le loader du bouton de connexion
     if (err.response?.data?.status === 401) {
@@ -78,7 +80,6 @@ const login = async () => {
     }
   }
 };
-
 </script>
 
 <style scoped>
@@ -100,7 +101,9 @@ const login = async () => {
 <template>
   <div id="bg-body-wrapper" class="bg-body wrapper dark:bg-dark-bg">
     <section class="block">
-      <div class="flex flex-wrap m-0 items-center bg-white dark:bg-dark-card h-screen">
+      <div
+        class="flex flex-wrap m-0 items-center bg-white dark:bg-dark-card h-screen"
+      >
         <div class="md:w-1/2 w-full flex-auto">
           <div class="flex flex-wrap justify-center">
             <div class="flex-auto md:px-10 px-4">
@@ -126,10 +129,12 @@ const login = async () => {
                   <form>
                     <div class="flex flex-wrap">
                       <div class="flex-auto w-full mb-4">
-                        <label for="email" class="mb-2 inline-block">E-mail</label>
+                        <label for="email" class="mb-2 inline-block"
+                          >E-mail</label
+                        >
                         <input
                           type="email"
-                          v-model="authentification.email"
+                          v-model="postData.email"
                           class="form-control dark:bg-dark-card focus:border-primary-500 dark:focus:border-primary-500"
                           id="email"
                           aria-describedby="email"
@@ -141,29 +146,14 @@ const login = async () => {
                         >
                         <input
                           type="password"
-                          v-model="authentification.password"
+                          v-model="postData.password"
                           class="form-control dark:bg-dark-card focus:border-primary-500 dark:focus:border-primary-500"
                           id="password"
                           aria-describedby="password"
                         />
                       </div>
-                      <!--											<div class="flex-auto w-full flex justify-between items-center">-->
-                      <!--												<div class="flex">-->
-                      <!--													<input type="checkbox"-->
-                      <!--													       class="rounded ml-2 mt-1 bg-no-repeat bg-center w-4 h-4 border border-primary-500 float-left"-->
-                      <!--													       id="customCheck1">-->
-                      <!--													<label class="form-check-label ml-2" for="customCheck1">-->
-                      <!--														Remember Me-->
-                      <!--													</label>-->
-                      <!--												</div>-->
-                      <!--												&lt;!&ndash;<a href="../../dashboard/auth/recoverpw.html"-->
-                      <!--												   class="text-primary-500 hover:text-primary-600">Forgot-->
-                      <!--													Password?-->
-                      <!--												</a> &ndash;&gt;-->
-                      <!--											</div>-->
                     </div>
                     <div class="flex justify-center">
-                      <!--											<button type="button" class="btn btn-primary" @click="login">Connexion</button>-->
                       <Button
                         label="Connexion"
                         :loading="loading"

@@ -47,7 +47,7 @@ const exportPDF = async () => {
   html2pdf().from(table.value).set(options).save();
 };
 
-const { error, postPayments, getPayments, paymentsMethods, loading } =
+const { error, postPayments, postCustomerPayments, getPayments, paymentsMethods, loading } =
   useTransaction();
 const { invoices, getPurchaseOrders } = usePurchaseOrders();
 
@@ -60,10 +60,10 @@ watch(error, (newValue) => {
 
 const postData = ref({});
 const payer = async () => {
-  postData.value.invoiceNumber = props.invoice.invoice_number;
+  postData.value.invoiceNumber = props.invoice.invoice.invoice_number;
   console.log(postData.value);
 
-  await postPayments(postData.value);
+  await postCustomerPayments(postData.value);
   if (!error.value) {
     toast.success("Paiement éffectué");
     postData.value = {};
@@ -85,7 +85,7 @@ const payer = async () => {
     maximizable
   >
     <div class="invoice" ref="table">
-      <h1>Facture</h1>
+      <h1>Facture Clients</h1>
       <!-- <p>Date d'édition : {{ formatDate(invoiceData.dateEdition) }}</p> -->
       <div class="flex-auto my-2">
         <p>Date de création : {{ $filters.formatDate(invoice.created_at) }}</p>
@@ -99,7 +99,7 @@ const payer = async () => {
         <p>Status : {{ invoice.is_paid ? "Payé" : "Non Payé" }}</p>
       </div>
 
-      <DataTable :value="invoice.purchase_order.products">
+      <DataTable :value="invoice.products">
         <Column field="designation" header="Désignation"></Column>
         <Column field="pivot.quantity" header="Quantité"></Column>
         <Column field="price" header="Prix Unitaire"> </Column>
@@ -108,10 +108,10 @@ const payer = async () => {
 
       <h2>Total : {{ $filters.formatAmount(invoice.total_amount) }}</h2>
 
-      <!-- {{ invoice.invoice_number }} -->
+      <!-- {{ invoice.invoice.invoice_number ?? '------------------' }} -->
       <!-- {{ postData }} -->
       <div>
-        <div class="mb-4 flex items-center" v-if="!invoice.is_paid">
+        <div class="mb-4 flex items-center" v-if="!invoice.invoice.is_paid">
           <Dropdown
             v-model="postData.payment_method"
             :options="props.paymentsMethods"

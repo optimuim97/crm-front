@@ -8,6 +8,7 @@ import PrimeVue from "primevue/config";
 import "vue3-toastify/dist/index.css";
 import "./index.css";
 import VueBarcode from "@chenfengyuan/vue-barcode";
+// import Invoice from 'vue-invoice'
 
 // import "./assets/css/core/libs.min.css";
 import "./assets/css/tailwind.css";
@@ -140,7 +141,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 app.use(DialogService);
 app.use(axiosPlugin, {});
-
+// app.use(Invoice)
 
 app.directive("tooltip", Tooltip);
 app.directive("badge", BadgeDirective);

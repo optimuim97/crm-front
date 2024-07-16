@@ -39,6 +39,7 @@
     "sweetalert2": "^11.10.3",
     "vue": "^3.3.4",
     "vue-flatpickr-component": "^11.0.4",
+    "vue-invoice": "^1.1.4",
     "vue-json-excel3": "^1.0.19",
     "vue-router": "^4.2.5",
     "vue3-lottie": "^3.3.0",

@@ -3,9 +3,9 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import useTransaction from "@/services/transactions";
 import useProducts from "@/services/products";
-import useProviders from "@/services/providers";
+import useCustomers from "@/services/customers";
 import useInvoice from "@/services/invoices";
-import usePurchaseOrders from "@/services/purchaseOrders";
+import useQuotation from "@/services/quotations";
 import { toast } from "vue3-toastify";
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
@@ -16,46 +16,51 @@ import TheLottieLoader from "@/components/partials/TheLottieLoader.vue";
 import Column from "primevue/column";
 
 // Modal
-import PaymentModal from "@/components/modals/PaymentModal.vue";
-import InvoiceModal from "@/components/modals/Invoices/InvoiceModal.vue";
-import PurchasOrderModal from "@/components/modals/PurchaseOrders/PurchasOrderModal.vue";
+// import PaymentModal from "@/components/modals/PaymentModal.vue";
+import InvoiceCustomerModal from "@/components/modals/Invoices/InvoiceCustomerModal.vue";
+import QuotationModal from "@/components/modals/Quotations/QuotationModal.vue";
 
 const postData = ref({});
 const totalAmount = ref(0);
 
 // API calls
 const { products, isLoading, loading, getProducts } = useProducts();
-const { providers, getProviders } = useProviders();
+const { customers, getCustomers } = useCustomers();
 const { postPayments, paymentsMethods, getPayments } = useTransaction();
-
 const { invoice, getInvoice } = useInvoice();
 
 const {
   error,
+  quotations,
   invoices,
   purchaseOrders,
-  postPurchaseOrders,
-  getPurchaseOrders,
-  validatePurchaseOrders,
-} = usePurchaseOrders();
+  postQuotation,
+  getQuotations,
+  validateQuotation,
+} = useQuotation();
 
-const addPurchaseOrder = async () => {
-  await postPurchaseOrders(postData.value);
+const addQuotation = async () => {
+  // filterProduct 
+  postData.value.products = postData.value.products.filter((product) => product.quantity_stock > 0);
+
+  await postQuotation(postData.value);
   // Reload Purchase Order
-  await getPurchaseOrders();
+  await getQuotations();
 
-  if (!error.value) {
-    toast.success("Bon de commande créer");
+  if (!error.value.code) {
+    toast.success("Dévis Ajouté");
     postData.value = {};
   }
 };
 
-const validerCommande = async (orderNumber) => {
-  await validatePurchaseOrders(orderNumber);
-  await getPurchaseOrders();
+const validerDevis = async (orderNumber) => {
+  await validateQuotation(orderNumber);
+  await getQuotations();
 
-  toast.success("Commande Validé");
-  postData.value = {};
+  if (!error.value.code) {
+    toast.success("Dévis Validé");
+    postData.value = {};
+  }
 };
 
 const updateProductList = async () => {
@@ -65,9 +70,13 @@ const updateProductList = async () => {
 function calculateTotalAmount(items) {
   return (
     items?.reduce((total, item) => {
-      const quantity = item.quantity || 0;
-      const price = item.price || 0;
-      return total + quantity * price;
+      if (item.quantity > item.quantity_stock) {
+        toast.error("Quantité en stock insuffisante");
+      } else {
+        const quantity = item.quantity || 0;
+        const price = item.price || 0;
+        return total + quantity * price;
+      }
     }, 0) ?? 0
   );
 }
@@ -91,9 +100,9 @@ watch(
 );
 
 onMounted(async () => {
-  await getPurchaseOrders();
+  await getQuotations();
   await getProducts();
-  await getProviders();
+  await getCustomers();
   await getPayments();
 });
 
@@ -115,8 +124,10 @@ const closeModal = () => {
 
 // Invoice Modal Action
 const showInvoiceModal = ref(false);
-const showInvoice = async (invoice_number) => {
-  await getInvoice(invoice_number);
+const showInvoice = async (data) => {
+  console.log({ invoiceData: data });
+  invoice.value = data;
+  // await getInvoice(invoice_number);
   showInvoiceModal.value = true;
 };
 const closeInvoiceModal = () => {
@@ -124,21 +135,30 @@ const closeInvoiceModal = () => {
 };
 // Invoice Modal Action
 
-// PurchaseOrder Modal Action
-const showPurchaseOrderModal = ref(false);
-const providerData = ref();
-const showPurchaseOrder = async (invoice_number, provider) => {
-  await getInvoice(invoice_number);
-  showPurchaseOrderModal.value = true;
-  providerData.value = provider;
+// Quotation Modal Action
+const showQuotationModal = ref(false);
+const customerData = ref();
+const quotation = ref();
+
+const showQuotation = async (quote, customer_fullname) => {
+  // await getInvoice(invoice_number);
+  showQuotationModal.value = true;
+  customerData.value = customer_fullname;
+  quotation.value = quote;
 };
-const closePurchaseModal = () => {
-  showPurchaseOrderModal.value = false;
+const closeQuotationModal = () => {
+  showQuotationModal.value = false;
 };
-// PurchaseOrder Modal Action
+// Quotation Modal Action
 
 const handleChange = (event) => {
-  totalAmount.value = calculateTotalAmount(event.value);
+  if (event.value.quantity_stock > 0) {
+    totalAmount.value = calculateTotalAmount(event.value);
+  }
+  if (event.value.quantity_stock == 0) {
+    console.log(">>>>>> Olala");
+    return false;
+  }
 };
 </script>
 
@@ -151,8 +171,8 @@ const handleChange = (event) => {
       <TheBanner></TheBanner>
       <!--Nav Start-->
       <TheHeaderNav
-        :pageTitle="`Création de Bon de commandes`"
-        page-description="Gestion des Clients"
+        :pageTitle="`Ventes`"
+        page-description="Gestion des Ventes"
       ></TheHeaderNav>
       <!-- Nav Header Component End -->
       <!--Nav End-->
@@ -166,20 +186,20 @@ const handleChange = (event) => {
 
           <div class="mb-4 flex items-center">
             <Dropdown
-              v-model="postData.provider"
-              :options="providers"
-              optionLabel="name"
+              v-model="postData.customer"
+              :options="customers"
+              optionLabel="first_name"
               class="w-full border"
-              placeholder="Selectionner Fournisseur"
+              placeholder="Selectionner Clients"
               filter
             >
               <template #option="slotProps">
                 <div>
                   <p>
-                    {{ slotProps.option.name }}
+                    {{ slotProps.option.first_name }}
                   </p>
                   <p>
-                    {{ slotProps.option.email }}
+                    {{ slotProps.option.last_name }}
                   </p>
                 </div>
               </template>
@@ -228,21 +248,30 @@ const handleChange = (event) => {
             >
               {{ product.designation }} -
               {{ $filters.formatAmount(product.price) }} (Quantité:
-              <!-- {{ product.quantity }} -->
+              <!-- {{ product.quantity_stock }} -->
 
               )
               <input
                 required
                 type="number"
                 v-model="product.quantity"
+                v-if="product.quantity_stock > 0"
                 min="1"
-                class="block w-1/4 font-bold text-2sm px-4 py-2 placeholder-secondary-400 dark:bg-dark-card dark:border-secondary-500 bg-white border rounded outline-none focus:border-primary-500 dark:focus:border-primary-500 focus:shadow"
+                :disabled="product.quantity_stock == product.quantity"
+                class="block w-1/4 font-bold text-2sm px-4 py-2 placeholder-secondary-400 dark:bg-dark-card dark:border-secondary-500 bg-white border rounded outline-none focus:border-primary-500 dark:focus:border-primary-500 focus:shadow mr-2"
               />
+
+              <span v-if="product.quantity_stock > 0">
+                Quantité en Stock
+                <Tag>
+                  {{ product.quantity_stock - product.quantity }}
+                </Tag>
+              </span>
+
+              <span v-else> </span>
             </li>
           </ul>
           <div class="text-xl font-bold">
-            <!-- {{ paymentsMethods }} -->
-
             Montant Total: {{ $filters.formatAmount(totalAmount) }}
           </div>
         </div>
@@ -258,7 +287,7 @@ const handleChange = (event) => {
           label="Soumettre"
           icon="pi pi-check"
           :loading="loading"
-          @click="addPurchaseOrder"
+          @click="addQuotation"
         />
       </div>
     </div>
@@ -266,14 +295,12 @@ const handleChange = (event) => {
     <div class="container mx-auto p-4">
       <div class="overflow-x-auto">
         <div class="mt-6 overflow-x-auto">
-          <!-- {{ purchaseOrders }} -->
-
           <DataTable
             :loading="loading"
             dataKey="id"
             ref="dt"
             filterDisplay="menu"
-            :value="purchaseOrders"
+            :value="quotations"
             paginator
             :rows="5"
             tableStyle="min-width: 50rem"
@@ -283,30 +310,25 @@ const handleChange = (event) => {
                 <div class="flex justify-start gap-2"></div>
               </div>
             </template>
-            <template #empty> Aucune Commande </template>
+            <template #empty> Aucune Dévis </template>
             <template #loading> Chargement... </template>
 
-            <Column header="Fournisseur">
+            <Column header="Client">
               <template #body="slotProps">
                 <td class="py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <h6 class="text-base capitalize truncate hover:text-clip">
-                      {{ slotProps.data.name }}
-                    </h6>
-                  </div>
                   <h6 class="text-base truncate hover:text-clip">
-                    {{ slotProps.data.phone_number }}
+                    {{ slotProps.data?.customer_fullname ?? "-" }}
                   </h6>
                 </td>
               </template>
             </Column>
 
-            <Column header=" # Numéro Commande ">
+            <Column header=" # Numéro Dévis ">
               <template #body="slotProps">
                 <td class="py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <h6 class="text-base capitalize truncate hover:text-clip">
-                      {{ slotProps.data.order_number ?? "-" }}
+                      {{ slotProps.data.quote_number ?? "-" }}
                     </h6>
                   </div>
                 </td>
@@ -317,8 +339,10 @@ const handleChange = (event) => {
               <template #body="slotProps">
                 <td class="py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <h6 class="text-base capitalize truncate hover:text-clip">
-                      {{ $filters.formatAmount(slotProps.data.total_amount) ?? 0 }}
+                    <h6 class="text-base truncate hover:text-clip">
+                      {{
+                        $filters.formatAmount(slotProps.data.total_amount) ?? 0
+                      }}
                     </h6>
                   </div>
                 </td>
@@ -333,7 +357,7 @@ const handleChange = (event) => {
                       <Tag
                         severity="success"
                         value="Validé"
-                        v-if="slotProps.data.is_valided"
+                        v-if="slotProps.data.confirmed"
                       ></Tag>
 
                       <Tag severity="warning" value="En attente" v-else></Tag>
@@ -377,18 +401,18 @@ const handleChange = (event) => {
                       class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
                       title="Plus d'actions"
                       href="javascript:void(0);"
-                      v-if="slotProps.data.is_valided != true"
-                      @click="validerCommande(slotProps.data.order_number)"
+                      v-if="!slotProps.data.confirmed"
+                      @click="validerDevis(slotProps.data.quote_number)"
                     >
                       Valider
                     </a>
 
                     <a
-                      v-if="slotProps.data.is_valided"
+                      v-if="slotProps.data.confirmed"
                       class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
                       title="Plus d'actions"
                       href="javascript:void(0);"
-                      @click="showInvoice(slotProps.data.invoice.invoice_number)"
+                      @click="showInvoice(slotProps.data)"
                     >
                       Facture
                     </a>
@@ -398,13 +422,13 @@ const handleChange = (event) => {
                       title="Plus d'actions"
                       href="javascript:void(0);"
                       @click="
-                        showPurchaseOrder(
-                          slotProps.data.invoice.invoice_number,
-                          slotProps.data
+                        showQuotation(
+                          slotProps.data,
+                          slotProps.data.customer_fullname
                         )
                       "
                     >
-                      Bon De Commande
+                      Dévis
                     </a>
                   </div>
                 </div>
@@ -414,8 +438,8 @@ const handleChange = (event) => {
 
             <template #footer>
               Il y a
-              {{ purchaseOrders ? purchaseOrders.length : 0 }}
-              Bon de Commande(s) au total.
+              {{ quotations ? quotations.length : 0 }}
+              élément(s) au total.
             </template>
           </DataTable>
         </div>
@@ -432,21 +456,21 @@ const handleChange = (event) => {
   >
   </PaymentModal> -->
 
-  <InvoiceModal
-    :paymentsMethods="paymentsMethods"
+  <InvoiceCustomerModal
     :visible="showInvoiceModal"
     :invoice="invoice"
     :showModal="showInvoiceModal"
     :closeModal="closeInvoiceModal"
+    :paymentsMethods="paymentsMethods"
   >
-  </InvoiceModal>
+  </InvoiceCustomerModal>
 
-  <PurchasOrderModal
-    :visible="showPurchaseOrderModal"
-    :invoice="invoice"
-    :showModal="showPurchaseOrderModal"
-    :closeModal="closePurchaseModal"
-    :provider="providerData"
+  <QuotationModal
+    :visible="showQuotationModal"
+    :quotation="quotation"
+    :showModal="showQuotationModal"
+    :closeModal="closeQuotationModal"
+    :customer="customerData"
   >
-  </PurchasOrderModal>
+  </QuotationModal>
 </template>

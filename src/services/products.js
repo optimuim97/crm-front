@@ -2,7 +2,8 @@ import { ref } from "vue";
 import axios from "axios";
 
 export default function () {
-  const products = ref([]); 
+  const products = ref([]);
+  const error = ref();
 
   const loading = ref(false);
   const isLoading = ref(false);
@@ -20,16 +21,23 @@ export default function () {
           if (data?.status == 200) {
           }
         } else if (code == 500) {
+          error.value = code;
+
           console.log(code);
         } else if (code == 401) {
+          error.value = code;
+
           console.log(code);
         } else if (code == 404) {
+          error.value = code;
+
           console.log(code);
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ e: e });
       })
       .finally(() => {
@@ -58,10 +66,13 @@ export default function () {
             // products.value = data.data;
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
@@ -88,16 +99,20 @@ export default function () {
             console.log({ result: data.data });
           }
         } else if (code == 500) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 401) {
+          error.value = code;
           console.log({ code: code });
         } else if (code == 404) {
+          error.value = code;
           console.log({ code: code });
         }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
+        error.value = code;
         console.log({ error: e });
       })
       .finally(() => {
@@ -106,6 +121,7 @@ export default function () {
   };
 
   return {
+    error,
     products,
     loading,
     isLoading,
