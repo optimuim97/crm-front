@@ -184,11 +184,13 @@ const handleChange = (event) => {
                 </div>
               </template>
             </Dropdown>
-            <button
-              class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              <i class="pi pi-plus"></i>
-            </button>
+            <router-link to="providers">
+              <button
+                class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                <i class="pi pi-plus"></i>
+              </button>
+            </router-link>
           </div>
 
           <div class="flex items-center">
@@ -209,11 +211,14 @@ const handleChange = (event) => {
               filterPlaceholder="Rechercher un produit"
               removable
             />
-            <button
-              class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              <i class="pi pi-plus"></i>
-            </button>
+
+            <router-link to="products">
+              <button
+                class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                <i class="pi pi-plus"></i>
+              </button>
+            </router-link>
           </div>
         </div>
 
@@ -318,7 +323,9 @@ const handleChange = (event) => {
                 <td class="py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <h6 class="text-base capitalize truncate hover:text-clip">
-                      {{ $filters.formatAmount(slotProps.data.total_amount) ?? 0 }}
+                      {{
+                        $filters.formatAmount(slotProps.data.total_amount) ?? 0
+                      }}
                     </h6>
                   </div>
                 </td>
@@ -388,7 +395,9 @@ const handleChange = (event) => {
                       class="block text-left pr-[0.5rem] pl-[1rem] py-1 ml-[0.5rem] mr-[0.5rem] whitespace-nowrap hover:text-white hover:bg-primary-500 hover:rounded"
                       title="Plus d'actions"
                       href="javascript:void(0);"
-                      @click="showInvoice(slotProps.data.invoice.invoice_number)"
+                      @click="
+                        showInvoice(slotProps.data.invoice.invoice_number)
+                      "
                     >
                       Facture
                     </a>

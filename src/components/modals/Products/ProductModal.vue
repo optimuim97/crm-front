@@ -1,8 +1,7 @@
 <script setup>
-import { onMounted, defineProps, ref } from "vue";
+import { onMounted, defineProps, ref, watch } from "vue";
 import useProducts from "@/services/products";
 import { toast } from "vue3-toastify";
-
 
 const emit = defineEmits(["refreshProducts"]);
 const previewImageRecto = ref();
@@ -21,13 +20,12 @@ const uploadImage = (e) => {
   };
 };
 
-const { getProducts, postProducts, loading } = useProducts();
+const { error, getProducts, postProducts, loading } = useProducts();
 
 function randomInt() {
-    const rand = Math.floor(Math.random() * 10000000000);
-    return rand;
+  const rand = Math.floor(Math.random() * 10000000000);
+  return rand;
 }
-
 
 const props = defineProps({
   showModal: Boolean,
@@ -36,13 +34,31 @@ const props = defineProps({
 
 const addProduct = async () => {
   await postProducts(postData);
-  // Reload
-  await getProducts();
 
-  emit('refreshProducts')
-  toast.success("Produit Ajouté");
-  props.closeModal();
+  if (!error.value.code) {
+    // Reload
+    await getProducts();
+    emit("refreshProducts");
+    toast.success("Produit Ajouté");
+    props.closeModal();
+  }
+
+  watch(error, (newValue) => {
+    if (newValue) {
+      toast.error(newValue.response.data.message ?? "Une erreur est survenue");
+    }
+  });
 };
+
+//Handle Error
+watch(error, (newValue) => {
+  if (newValue) {
+
+      console.log({errrrror:newValue})
+
+    toast.error(newValue.response.data.message ?? "Une erreur est survenue");
+  }
+});
 
 onMounted(() => {
   postData.barcode = randomInt();

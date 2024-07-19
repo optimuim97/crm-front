@@ -70,6 +70,7 @@ export default function () {
         loading.value = false;
       })
       .catch((e) => {
+        error.value = e;
         console.log({ error: e });
       })
       .finally(() => {
@@ -108,6 +109,7 @@ export default function () {
   };
 
   return {
+    error,
     customers,
     loading,
     isLoading,

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, defineProps, ref } from "vue";
+import { onMounted, defineProps, ref, watch } from "vue";
 import useCustomers from "@/services/customers";
 import { toast } from "vue3-toastify";
 
@@ -20,7 +20,7 @@ const uploadImage = (e) => {
   };
 };
 
-const { getCustomers, postCustomers, loading } = useCustomers();
+const { error, getCustomers, postCustomers, loading } = useCustomers();
 
 function randomInt() {
   const rand = Math.floor(Math.random() * 10000000000);
@@ -35,13 +35,21 @@ const props = defineProps({
 const addProduct = async () => {
   await postCustomers(postData);
 
-  // Reload
-  await getCustomers();
-
-  emit("refreshCustomers");
-  toast.success("Utilisateur Ajouté");
-  props.closeModal();
+  if (!error) {
+    // Reload
+    await getCustomers();
+    emit("refreshCustomers");
+    toast.success("Utilisateur Ajouté");
+    props.closeModal();
+  }
 };
+
+//Handle Error
+watch(error, (newValue) => {
+  if (newValue) {
+    toast.error(newValue.response.data.message ?? "Une erreur est survenue");
+  }
+});
 
 onMounted(() => {
   postData.barcode = randomInt();

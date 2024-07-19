@@ -60,10 +60,7 @@ export default function () {
         if (status == 200) {
           if (data?.status == 200) {
             products.value.push(data.data);
-
             console.log({ result: data.data });
-
-            // products.value = data.data;
           }
         } else if (code == 500) {
           error.value = code;
@@ -75,11 +72,16 @@ export default function () {
           error.value = code;
           console.log({ code: code });
         }
+        else if (code == 422) {
+          error.value = code;
+          console.log({ code: code });
+        }
         isLoading.value = false;
         loading.value = false;
       })
       .catch((e) => {
-        console.log({ error: e });
+        error.value = e;
+        // console.log({ error: e });
       })
       .finally(() => {
         loading.value = false;

@@ -47,7 +47,7 @@ export default function () {
 
   const postQuotation = async (postedData) => {
     loading.value = true;
-    postedData.customer_id = postedData.customer.id;
+    postedData.customer_id = postedData?.customer?.id ?? 0;
 
     await axios
       .post("/create-quotation", postedData, {

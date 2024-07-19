@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import store from "@/stores/index";
 import { useRouter } from "vue-router";
@@ -22,11 +22,19 @@ if (storeAdmin.token) {
   var exp = decoded.exp;
 }
 
-if (exp < Date.now() / 1000) {
-  router.push({ name: "Connexion" });
-} else {
-  // router.push({ name: "Achats" });
-}
+const checkIsLoginOrRedirect = () => {
+  if (storeAdmin.token) {
+    const decoded = jwtDecode(storeAdmin.token);
+    var exp = decoded.exp;
+  }
+
+  if (exp < Date.now() / 1000) {
+    router.push({ name: "Connexion" });
+  } else if (exp > Date.now() / 1000) {
+    router.push({ name: "Achats" });
+  }
+  
+};
 
 const login = async () => {
   if (
@@ -80,6 +88,10 @@ const login = async () => {
     }
   }
 };
+
+onMounted(async () => {
+  await checkIsLoginOrRedirect();
+});
 </script>
 
 <style scoped>

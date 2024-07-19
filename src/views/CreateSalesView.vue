@@ -40,8 +40,10 @@ const {
 } = useQuotation();
 
 const addQuotation = async () => {
-  // filterProduct 
-  postData.value.products = postData.value.products.filter((product) => product.quantity_stock > 0);
+  // filterProduct
+  postData.value.products = postData.value?.products?.filter(
+    (product) => product.quantity_stock > 0
+  );
 
   await postQuotation(postData.value);
   // Reload Purchase Order
@@ -204,19 +206,17 @@ const handleChange = (event) => {
                 </div>
               </template>
             </Dropdown>
-            <button
-              class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              <i class="pi pi-plus"></i>
-            </button>
+
+            <router-link to="customers">
+              <button
+                class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                <i class="pi pi-plus"></i>
+              </button>
+            </router-link>
           </div>
 
           <div class="flex items-center">
-            <!-- <label
-              for="multiselect"
-              class="block text-sm font-medium text-gray-700 mr-4"
-              >Choisissez les produits :</label
-            > -->
             <MultiSelect
               v-model="postData.products"
               :options="products"
@@ -229,11 +229,13 @@ const handleChange = (event) => {
               filterPlaceholder="Rechercher un produit"
               removable
             />
-            <button
-              class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              <i class="pi pi-plus"></i>
-            </button>
+            <router-link to="products">
+              <button
+                class="ml-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                <i class="pi pi-plus"></i>
+              </button>
+            </router-link>
           </div>
         </div>
 
