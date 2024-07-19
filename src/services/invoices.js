@@ -38,7 +38,6 @@ export default function () {
       })
       .catch((e) => {
         error.value = e;
-
         console.log({ error: e });
       })
       .finally(() => {
@@ -46,11 +45,10 @@ export default function () {
       });
   };
 
-
   return {
     invoice,
     loading,
     isLoading,
-    getInvoice
+    getInvoice,
   };
 }

@@ -25,7 +25,7 @@ if (storeAdmin.token) {
 if (exp < Date.now() / 1000) {
   router.push({ name: "Connexion" });
 } else {
-  router.push({ name: "Achats" });
+  // router.push({ name: "Achats" });
 }
 
 const login = async () => {
